@@ -1,25 +1,15 @@
-import gradio as gr
 import numpy as np
-from PIL import Image
+import gradio as gr
 
-def segment(img):
-    # Convert image to grayscale
-    gray = img.convert("L")
-    # Convert to numpy array
-    arr = np.array(gray)
-    # Simple thresholding for segmentation
-    mask = arr > 128
-    # Convert mask to uint8 and scale to 255
-    mask_img = Image.fromarray((mask * 255).astype(np.uint8))
-    return mask_img
+def sepia(input_img):
+    sepia_filter = np.array([
+        [0.393, 0.769, 0.189],
+        [0.349, 0.686, 0.168],
+        [0.272, 0.534, 0.131]
+    ])
+    sepia_img = input_img.dot(sepia_filter.T)
+    sepia_img /= sepia_img.max()
+    return sepia_img
 
-iface = gr.Interface(
-    fn=segment,
-    inputs=gr.Image(type="pil"),
-    outputs=gr.Image(type="pil", label="Segmentation Mask"),
-    title="Simple Image Segmentation Demo",
-    description="Upload an image and see a basic segmentation mask (threshold-based). Replace the 'segment' function with your own segmentation model for better results."
-)
-
-if __name__ == "__main__":
-    iface.launch()
+demo = gr.Interface(sepia, gr.Image(), "image")
+demo.launch()
